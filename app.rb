@@ -20,14 +20,17 @@ Pony.options = {
   }
 }
 
-configure do
-  enable :sessions
-
+def get_db_connection
   db = URI.parse(ENV['MONGOHQ_URL'])
   db_name = db.path.gsub(/^\//, '')
   @db_connection = Mongo::Connection.new(db.host, db.port).db(db_name)
   @db_connection.authenticate(db.user, db.password) unless (db.user.nil? || db.user.nil?)
-  set :mongo_db, @db_connection
+  @db_connection
+end
+
+configure do
+  enable :sessions
+  set :mongo_db, get_db_connection
 end
 
 get "/" do
@@ -47,4 +50,3 @@ post "/_email" do
 
   redirect to("/")
 end
-

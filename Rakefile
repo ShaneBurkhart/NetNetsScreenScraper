@@ -7,11 +7,11 @@ task :run do
 end
 
 task :scrape do
+  require "./app"
   require "mongo"
   include Mongo
 
-  conn = MongoClient.new "localhost", 27017
-  db = conn.db "test"
+  db = get_db_connection
   collection = db.collection "stocks"
 
   collection.drop
