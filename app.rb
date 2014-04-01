@@ -49,7 +49,7 @@ post "/_email" do
 
   settings.mongo_db["stocks"].find.each do |stock|
     stock.keys.each do |key|
-      file += "#{key} : #{stock}" unless key == "_id"
+      file += "#{key} : #{stock[key]}" unless key == "_id"
       file += "\n\n"
     end
   end
