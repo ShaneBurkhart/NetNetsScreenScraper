@@ -14,13 +14,15 @@ task :scrape do
   db = conn.db "test"
   collection = db.collection "stocks"
 
+  collection.drop
+
   length = NetNets.tickers.length
   NetNets.tickers.each_with_index do |ticker, i|
     puts "#{i} of #{length}"
     s = NetNets::Stock.new(ticker)
     s.calculate
 
-    unless s.price_to_liquid_ratio > 0 && s.price_to_liquid_ratio < 75
+    if s.price_to_liquid_ratio > 0 && s.price_to_liquid_ratio < 75
       collection.insert s.to_json
     end
   end
