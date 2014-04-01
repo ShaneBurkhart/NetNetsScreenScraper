@@ -27,5 +27,12 @@ task :scrape do
     end
   end
 
-  conn.close
+  db.client.close
+end
+
+task :test do
+  db = get_db_connection
+  collection = db.collection "test"
+  puts "Worked"
+  db.client.close
 end
