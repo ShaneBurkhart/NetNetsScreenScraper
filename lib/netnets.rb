@@ -1,5 +1,6 @@
 require "nokogiri"
 require "open-uri"
+require "json"
 
 
 module NetNets
@@ -7,7 +8,7 @@ module NetNets
   @@missed_keys = {}
 
   def self.tickers
-    file = File.new("tickers.dat", "r").read.split(/\n/)
+    file = File.new(File.join(File.dirname(__FILE__), "tickers.dat"), "r").read.split(/\n/)
   end
 
   def self.add_missed_key(label)
@@ -129,6 +130,19 @@ module NetNets
         "Net Liquid Capital / Share:\t#{net_liquid_capital_per_share}",
         "Price to Liquid Ratio:\t\t%#{price_to_liquid_ratio}"
       ].join("\n")
+    end
+
+    def to_json
+      {
+        ticker: @ticker,
+        current_price: @price,
+        outstanding_shares: @outstanding_shares,
+        liabilities: @liabilities,
+        tangible_assets: @assets,
+        net_liquid_capital: net_liquid_capital,
+        net_liquid_capital_per_share: net_liquid_capital_per_share,
+        price_to_liquid_ratio: price_to_liquid_ratio
+      }
     end
 
     private
