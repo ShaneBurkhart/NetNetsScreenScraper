@@ -45,7 +45,7 @@ get "/" do
 end
 
 post "/_email" do
-  file = File.new(File.join(File.dirname(__FILE__), "view/mail.txt"), "r").read
+  file = File.new(File.join(File.dirname(__FILE__), "views/mail.txt"), "r").read
 
   settings.mongo_db["stocks"].find.each do |stock|
     stock.keys.each do |key|
