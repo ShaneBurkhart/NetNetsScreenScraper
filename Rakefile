@@ -11,7 +11,8 @@ task :scrape do
   require "mongo"
   include Mongo
 
-  db = get_db_connection
+  conn = get_mongo_connection
+  db = get_db_connection(conn)
   collection = db.collection "stocks"
 
   collection.drop
@@ -27,7 +28,7 @@ task :scrape do
     end
   end
 
-  db.client.close
+  conn.close
 end
 
 task :test do

@@ -20,17 +20,21 @@ Pony.options = {
   }
 }
 
-def get_db_connection
+def get_mongo_connection
   db = URI.parse(ENV['MONGOHQ_URL'])
   db_name = db.path.gsub(/^\//, '')
-  @db_connection = Mongo::Connection.new(db.host, db.port).db(db_name)
+  Mongo::Connection.new(db.host, db.port)
+end
+
+def get_db_connection client
+  @db_connection = client.db(db_name)
   @db_connection.authenticate(db.user, db.password) unless (db.user.nil? || db.user.nil?)
   @db_connection
 end
 
 configure do
   enable :sessions
-  set :mongo_db, get_db_connection
+  set :mongo_db, get_db_connection(get_mongo_connection)
 end
 
 get "/" do
