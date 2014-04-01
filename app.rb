@@ -45,13 +45,20 @@ get "/" do
 end
 
 post "/_email" do
-  @stocks = []
-  settings.mongo_db["stocks"].find.each{ |stock| @stocks << stock }
+  file = File.new(File.join(File.dirname(__FILE__), "view/mail.txt"), "r").read
+
+  settings.mongo_db["stocks"].find.each do |stock|
+    stock.keys.each do |key|
+      file += "#{key} : #{stock}" unless key == "_id"
+      file += "\n\n"
+    end
+  end
+
 
   Pony.mail   to: params[:email],
               from: "noreply@shaneburkhart.com",
               subject: "Here are some stocks!",
-              body: haml(:mail, locals: { stocks: @stocks })
+              body: file
 
   session[:flash] = "Success!"
 
