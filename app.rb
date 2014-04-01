@@ -21,6 +21,7 @@ Pony.options = {
 }
 
 def get_mongo_connection
+  puts ENV['MONGOHQ_URL']
   db = URI.parse(ENV['MONGOHQ_URL'])
   db_name = db.path.gsub(/^\//, '')
   Mongo::Connection.new(db.host, db.port)
