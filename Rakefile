@@ -1,4 +1,5 @@
 require "./lib/netnets"
+require "./app"
 
 task default: [:run]
 
@@ -7,7 +8,6 @@ task :run do
 end
 
 task :scrape do
-  require "./app"
   require "mongo"
   include Mongo
 
