@@ -2,8 +2,8 @@ require "sinatra"
 require "haml"
 require "date"
 require "mongo"
-require "json/ext"
 require "pony"
+require "uri"
 
 include Mongo
 
@@ -22,9 +22,12 @@ Pony.options = {
 
 configure do
   enable :sessions
-  conn = MongoClient.new("localhost", 27017)
-  set :mongo_connection, conn
-  set :mongo_db, conn.db("test")
+
+  db = URI.parse(ENV['MONGOHQ_URL'])
+  db_name = db.path.gsub(/^\//, '')
+  @db_connection = Mongo::Connection.new(db.host, db.port).db(db_name)
+  @db_connection.authenticate(db.user, db.password) unless (db.user.nil? || db.user.nil?)
+  set :mongo_db, @db_connection
 end
 
 get "/" do
