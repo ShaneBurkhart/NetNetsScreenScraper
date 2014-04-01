@@ -32,8 +32,9 @@ task :scrape do
 end
 
 task :test do
-  db = get_db_connection
+  conn = get_mongo_connection
+  db = get_db_connection(conn)
   collection = db.collection "test"
   puts "Worked"
-  db.client.close
+  conn.close
 end
