@@ -21,7 +21,7 @@ Pony.options = {
 
 configure do
   enable :sessions
-  #set :mongo_db, get_db_connection(get_mongo_connection)
+  set :mongo_db, get_db_connection(get_mongo_connection)
 end
 
 get "/" do
