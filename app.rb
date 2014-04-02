@@ -1,11 +1,10 @@
 require "sinatra"
 require "haml"
 require "date"
-require "mongo"
 require "pony"
 require "uri"
+require "./lib/connection"
 
-include Mongo
 
 Pony.options = {
   :via => :smtp,
@@ -20,24 +19,9 @@ Pony.options = {
   }
 }
 
-def get_mongo_connection
-  puts ENV['MONGOHQ_URL']
-  db = URI.parse(ENV['MONGOHQ_URL'])
-  db_name = db.path.gsub(/^\//, '')
-  Mongo::Connection.new(db.host, db.port)
-end
-
-def get_db_connection client
-  db = URI.parse(ENV['MONGOHQ_URL'])
-  db_name = db.path.gsub(/^\//, '')
-  @db_connection = client.db(db_name)
-  @db_connection.authenticate(db.user, db.password) unless (db.user.nil? || db.user.nil?)
-  @db_connection
-end
-
 configure do
   enable :sessions
-  set :mongo_db, get_db_connection(get_mongo_connection)
+  #set :mongo_db, get_db_connection(get_mongo_connection)
 end
 
 get "/" do
