@@ -20,4 +20,7 @@ task :test do
   conn.close
 end
 
-
+task :worker_test do
+  require "./lib/worker"
+  ScraperWorker.perform_async
+end
