@@ -26,7 +26,7 @@ class ScraperWorker
     length = NetNets.tickers.length
     NetNets.tickers.each_with_index do |ticker, i|
       puts "#{i} of #{length}"
-      s = NetNets::Stock.new(ticker)
+      s = NetNets::Stock.new(ticker.strip)
       s.calculate
 
       if s.price_to_liquid_ratio > 0 && s.price_to_liquid_ratio < 75

@@ -57,14 +57,22 @@ module NetNets
       @outstanding_shares = 0.0
       @price = 0.0
 
-      p_doc = Nokogiri::HTML(open(url))
+      begin
+        p_doc = Nokogiri::HTML(open(url))
+      rescue
+        return
+      end
       price_cell = p_doc.css(NetNets.cur_price_sel).first
       if price_cell
         price_data = price_cell.content
         @price = price_data.to_f if(price_data =~ /\A[-+]?[0-9]*\.?[0-9]+\Z/)
       end
 
-      doc = Nokogiri::HTML(open(bal_url))
+      begin
+        doc = Nokogiri::HTML(open(bal_url))
+      rescue
+        return
+      end
 
       doc.css(NetNets.quart_bal_row_sel).each do |row|
         cols = row.css("td")
@@ -97,7 +105,11 @@ module NetNets
     end
 
     def net_liquid_capital
-      @assets - @liabilities
+      begin
+        @assets - @liabilities
+      rescue
+        return -1
+      end
     end
 
     def net_liquid_capital_per_share
