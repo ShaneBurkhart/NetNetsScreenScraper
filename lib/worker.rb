@@ -1,3 +1,4 @@
+require "./lib/netnets"
 require "./lib/connection"
 require "sidekiq"
 require "mongo"

@@ -9,7 +9,6 @@ end
 
 task :scrape do
   require "./lib/worker.rb"
-
   ScraperWorker.perform_async
 end
 
