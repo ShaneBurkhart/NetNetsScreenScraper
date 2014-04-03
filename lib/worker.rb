@@ -4,6 +4,14 @@ require "mongo"
 
 include Mongo
 
+Sidekiq.configure_server do |config|
+    config.redis = { :url => ENV["REDISTOGO_URL"] }
+end
+
+Sidekiq.configure_client do |config|
+  config.redis = { :url => ENV["REDISTOGO_URL"] }
+end
+
 class ScraperWorker
   include Sidekiq::Worker
 
