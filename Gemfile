@@ -8,6 +8,7 @@ gem "mongo", "1.9.2"
 gem "bson_ext", "1.9.2"
 
 gem 'sidekiq', "3.0.0"
+gem 'redis', "3.0.7"
 
 gem "haml", "4.0.3"
 

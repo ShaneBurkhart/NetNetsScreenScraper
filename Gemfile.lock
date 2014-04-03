@@ -61,6 +61,7 @@ DEPENDENCIES
   nokogiri (= 1.6.1)
   pony (= 1.8)
   rake (= 10.1.0)
+  redis (= 3.0.7)
   sidekiq (= 3.0.0)
   sinatra (= 1.4.4)
   unicorn (= 4.8.2)
