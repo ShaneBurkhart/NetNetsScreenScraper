@@ -11,6 +11,12 @@ module NetNets
     file = File.new(File.join(File.dirname(__FILE__), "tickers.dat"), "r").read.split(/\n/)
   end
 
+  def self.write_tickers(tickers)
+    File.open(File.join(File.dirname(__FILE__), "tickers.dat"), "w") do
+      |f| f.write(tickers.join("\n"))
+    end
+  end
+
   def self.add_missed_key(label)
     @@missed_keys[label] = true
   end
@@ -102,6 +108,29 @@ module NetNets
         end
       end
 
+    end
+
+    def chinese?
+      begin
+        doc = Nokogiri::HTML(open(url))
+      rescue
+        return true #If invalid url should be removed anyways.
+      end
+
+      c = doc.css(".g-c")
+
+      c.each do |p|
+        es = p.css("div");
+
+        es.each_with_index do |e, i|
+          if e.content == "Address"
+            return true if es[i + 1].content.downcase.include?("china")
+          end
+        end
+
+      end
+
+      return false
     end
 
     def net_liquid_capital

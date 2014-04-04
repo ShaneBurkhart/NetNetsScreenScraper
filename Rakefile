@@ -35,3 +35,19 @@ task :dyno_ping do
     puts "No PING_URL found..."
   end
 end
+
+task :remove_china do
+  new_tickers = []
+
+  NetNets.tickers.each do |ticker|
+    s = NetNets::Stock.new ticker
+    unless s.chinese?
+      new_tickers << ticker
+    else
+      puts "Chinese: #{ticker}"
+    end
+  end
+
+  NetNets.write_tickers new_tickers
+  puts "All Chinese companies have been removed."
+end
