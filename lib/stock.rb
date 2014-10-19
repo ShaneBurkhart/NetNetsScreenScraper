@@ -1,51 +1,16 @@
 require "nokogiri"
 require "open-uri"
 require "json"
+require "./lib/db"
 
 
 module NetNets
-
-  @@missed_keys = {}
-
-  def self.tickers
-    file = File.new(File.join(File.dirname(__FILE__), "tickers.dat"), "r").read.split(/\n/)
-  end
-
-  def self.write_tickers(tickers)
-    File.open(File.join(File.dirname(__FILE__), "tickers.dat"), "w") do
-      |f| f.write(tickers.join("\n"))
-    end
-  end
-
-  def self.add_missed_key(label)
-    @@missed_keys[label] = true
-  end
-
-  def self.missed_keys
-    @@missed_keys
-  end
-
-  def self.quart_bal_row_sel
-    "##{QUARTER_BALANCE_DIV_ID} table tr"
-  end
-
-  def self.cur_price_sel
-    CURRENT_PRICE_SELECTOR
-  end
-
-  def self.liability_mult
-    LIABILITY_MULTIPLIERS
-  end
-
-  def self.asset_mult
-    ASSET_MULTIPLIERS
-  end
-
-  def self.outstanding_label
-    OUTSTANDING_SHARES_LABEL
-  end
-
   class Stock
+
+    def self.tickers
+      file = File.new(File.join(File.dirname(__FILE__), "tickers.dat"), "r").read.split(/\n/)
+    end
+
     @ticker = ""
     @asset = 0.0
     @liabilities = 0.0
@@ -68,7 +33,8 @@ module NetNets
       rescue
         return
       end
-      price_cell = p_doc.css(NetNets.cur_price_sel).first
+
+      price_cell = p_doc.css(CURRENT_PRICE_SELECTOR).first
       if price_cell
         price_data = price_cell.content
         @price = price_data.to_f if(price_data =~ /\A[-+]?[0-9]*\.?[0-9]+\Z/)
@@ -80,57 +46,35 @@ module NetNets
         return
       end
 
-      doc.css(NetNets.quart_bal_row_sel).each do |row|
+      doc.css("#{QUARTER_BALANCE_DIV_ID} tr").each do |row|
         cols = row.css("td")
 
         first = cols.shift
         label = first.content.strip if first
 
         data_cell = cols.shift
-        if(data_cell)
+
+        if data_cell
           data = data_cell.content
           data = data.gsub(/\,/, "").strip
 
-           NetNets.add_missed_key(label) if(NetNets.asset_mult[label].nil? && NetNets.liability_mult[label].nil?)
-
-          if(data =~ /\A[-+]?[0-9]*\.?[0-9]+\Z/)
+          if data =~ /\A[-+]?[0-9]*\.?[0-9]+\Z/
             v = data.to_f
 
-            a_mult = NetNets.asset_mult[label] || 0.0
+            a_mult = ASSET_MULTIPLIERS[label] || 0.0
             @assets += v * a_mult
 
-            l_mult = NetNets.liability_mult[label] || 0.0
+            l_mult = LIABILITY_MULTIPLIERS[label] || 0.0
             @liabilities += v * l_mult
 
-            @outstanding_shares = v || 0.0 if(label == NetNets.outstanding_label)
+            if label == OUTSTANDING_SHARES_LABEL
+              @outstanding_shares = v || 0.0
+            end
           end
 
         end
       end
 
-    end
-
-    def chinese?
-      begin
-        doc = Nokogiri::HTML(open(url))
-      rescue
-        return true #If invalid url should be removed anyways.
-      end
-
-      c = doc.css(".g-c")
-
-      c.each do |p|
-        es = p.css("div");
-
-        es.each_with_index do |e, i|
-          if e.content == "Address"
-            return true if es[i + 1].content.downcase.include?("china")
-          end
-        end
-
-      end
-
-      return false
     end
 
     def net_liquid_capital
@@ -186,6 +130,27 @@ module NetNets
       }
     end
 
+    def save
+      json = to_json
+      query = "
+        INSERT INTO stocks (
+          ticker,
+          current_price,
+          outstanding_shares,
+          liabilities,
+          tangible_assets,
+          net_liquid_capital,
+          net_liquid_capital_per_share,
+          price_to_liquid_ratio
+        ) VALUES (
+          ?, ?, ?, ?, ?, ?, ?, ?
+        );
+      "
+      puts query
+
+      NetNets::DB.connection.execute(query, json.values)
+    end
+
     private
       def bal_url
         "https://www.google.com/finance?q=#{@ticker}&fstype=ii"
@@ -196,7 +161,7 @@ module NetNets
       end
   end
 
-  QUARTER_BALANCE_DIV_ID = "balinterimdiv"
+  QUARTER_BALANCE_DIV_ID = "#balinterimdiv"
   CURRENT_PRICE_SELECTOR= "#price-panel > div > span.pr > span"
 
   ASSET_MULTIPLIERS = {

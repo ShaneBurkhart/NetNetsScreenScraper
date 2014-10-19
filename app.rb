@@ -1,27 +1,27 @@
 require "sinatra"
 require "haml"
 require "date"
-require "pony"
+#require "pony"
 require "uri"
-require "./lib/connection"
+require "./lib/db"
 
 
-Pony.options = {
-  :via => :smtp,
-  :via_options => {
-    :address => 'smtp.sendgrid.net',
-    :port => '587',
-    :domain => 'heroku.com',
-    :user_name => ENV['SENDGRID_USERNAME'],
-    :password => ENV['SENDGRID_PASSWORD'],
-    :authentication => :plain,
-    :enable_starttls_auto => true
-  }
-}
+#Pony.options = {
+  #:via => :smtp,
+  #:via_options => {
+    #:address => 'smtp.sendgrid.net',
+    #:port => '587',
+    #:domain => 'heroku.com',
+    #:user_name => ENV['SENDGRID_USERNAME'],
+    #:password => ENV['SENDGRID_PASSWORD'],
+    #:authentication => :plain,
+    #:enable_starttls_auto => true
+  #}
+#}
 
 configure do
   enable :sessions
-  set :mongo_db, get_db_connection(get_mongo_connection)
+  set :db, NetNets::DB.connection
 end
 
 get "/" do
@@ -39,10 +39,10 @@ post "/_email" do
   end
 
 
-  Pony.mail   to: params[:email],
-              from: "noreply@shaneburkhart.com",
-              subject: "Here are some stocks!",
-              body: file
+  #Pony.mail   to: params[:email],
+              #from: "noreply@shaneburkhart.com",
+              #subject: "Here are some stocks!",
+              #body: file
 
   session[:flash] = "Success!"
 

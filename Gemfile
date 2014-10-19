@@ -4,11 +4,7 @@ gem "rake", "10.1.0"
 
 gem "unicorn", "4.8.2"
 gem "sinatra", "1.4.4"
-gem "mongo", "1.9.2"
-gem "bson_ext", "1.9.2"
-
-gem 'sidekiq', "3.0.0"
-gem 'redis', "3.0.7"
+gem "sqlite3"
 
 gem "haml", "4.0.3"
 
