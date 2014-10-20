@@ -38,7 +38,7 @@ PLATFORMS
 
 DEPENDENCIES
   haml (= 4.0.3)
-  nokogiri (= 1.6.1)
+  nokogiri
   pony (= 1.8)
   rake (= 10.1.0)
   sinatra (= 1.4.4)

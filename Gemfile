@@ -10,5 +10,4 @@ gem "haml", "4.0.3"
 
 gem "pony", "1.8"
 
-gem "nokogiri", "1.6.1"
-
+gem "nokogiri"
