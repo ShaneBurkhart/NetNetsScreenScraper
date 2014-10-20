@@ -1,9 +1,8 @@
 require "sinatra"
 require "haml"
-require "date"
-#require "pony"
-require "uri"
+require "pony"
 require "./lib/db"
+require "./lib/stock"
 
 
 #Pony.options = {
@@ -31,13 +30,22 @@ end
 post "/_email" do
   file = File.new(File.join(File.dirname(__FILE__), "views/mail.txt"), "r").read
 
-  settings.mongo_db["stocks"].find.each do |stock|
-    stock.keys.each do |key|
-      file += "#{key} : #{stock[key]}" unless key == "_id"
-      file += "\n\n"
-    end
+  NetNets::Stock.all.each do |stock|
+    file += [
+      "ticker: #{stock[1]}",
+      "current_price: $#{stock[2]}",
+      "outstanding_shares: #{stock[3]}",
+      "liabilities: #{stock[4]}",
+      "tangible_assets: #{stock[5]}",
+      "net_liquid_capital: #{stock[6]}",
+      "net_liquid_capital_per_share: #{stock[7]}",
+      "price_to_liquid_ratio: #{stock[8]}%",
+      "",
+      ""
+    ].join("\n")
   end
 
+  puts file
 
   #Pony.mail   to: params[:email],
               #from: "noreply@shaneburkhart.com",

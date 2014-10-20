@@ -6,6 +6,8 @@ task default: [:scrape]
 task :scrape do
   NetNets::DB.connection
 
+  NetNets::Stock.clear
+
   NetNets::Stock.tickers.each do |ticker|
     s = NetNets::Stock.new(ticker)
     s.calculate

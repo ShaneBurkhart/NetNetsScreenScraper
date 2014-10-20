@@ -11,6 +11,19 @@ module NetNets
       file = File.new(File.join(File.dirname(__FILE__), "tickers.dat"), "r").read.split(/\n/)
     end
 
+    def self.all
+      query = "
+        SELECT *
+        FROM stocks s
+      "
+      NetNets::DB.connection.execute(query)
+    end
+
+    def self.clear
+      query = "DELETE FROM stocks"
+      NetNets::DB.connection.execute(query)
+    end
+
     @ticker = ""
     @asset = 0.0
     @liabilities = 0.0
@@ -79,7 +92,12 @@ module NetNets
 
     def net_liquid_capital
       begin
-        @assets - @liabilities
+        num = @assets - @liabilities
+        if num.nan?
+          return -1
+        else
+          return num
+        end
       rescue
         return -1
       end
@@ -87,7 +105,12 @@ module NetNets
 
     def net_liquid_capital_per_share
       begin
-        return net_liquid_capital / @outstanding_shares
+        num = net_liquid_capital / @outstanding_shares
+        if num.nan?
+          return -1
+        else
+          return num
+        end
       rescue
         puts "Net Liquid Capital Per Share Error"
         return -1
@@ -96,7 +119,12 @@ module NetNets
 
     def price_to_liquid_ratio
       begin
-        return (@price / net_liquid_capital_per_share * 10000).round / 100.0
+        num = (@price / net_liquid_capital_per_share * 10000).round / 100.0
+        if num.nan?
+          return -1
+        else
+          return num
+        end
       rescue
         puts "Price to Liquid Ratio Error"
         return -1
@@ -119,19 +147,24 @@ module NetNets
 
     def to_json
       {
-        ticker: @ticker,
-        current_price: @price,
-        outstanding_shares: @outstanding_shares,
-        liabilities: @liabilities,
-        tangible_assets: @assets,
-        net_liquid_capital: net_liquid_capital,
-        net_liquid_capital_per_share: net_liquid_capital_per_share,
-        price_to_liquid_ratio: price_to_liquid_ratio
+        ticker: @ticker || "",
+        current_price: @price || 0,
+        outstanding_shares: @outstanding_shares || 0,
+        liabilities: @liabilities || 0,
+        tangible_assets: @assets || 0,
+        net_liquid_capital: net_liquid_capital || 0,
+        net_liquid_capital_per_share: net_liquid_capital_per_share || 0,
+        price_to_liquid_ratio: price_to_liquid_ratio || 0
       }
     end
 
     def save
       json = to_json
+      ptlr = json[:price_to_liquid_ratio]
+      if ptlr <= 0 || ptlr >= 75
+        return false
+      end
+
       query = "
         INSERT INTO stocks (
           ticker,
@@ -146,8 +179,6 @@ module NetNets
           ?, ?, ?, ?, ?, ?, ?, ?
         );
       "
-      puts query
-
       NetNets::DB.connection.execute(query, json.values)
     end
 
