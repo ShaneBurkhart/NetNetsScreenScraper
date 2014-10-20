@@ -18,3 +18,7 @@ end
 task :run do
   sh "unicorn -p 3000 -c ./config/unicorn.rb"
 end
+
+task :run_prod do
+  sh "unicorn -p 80 -c ./config/unicorn.rb"
+end
