@@ -12,6 +12,7 @@ task :scrape do
     s = NetNets::Stock.new(ticker)
     s.calculate
     s.save
+    puts s.to_json
   end
 
   NetNets::DB.close
