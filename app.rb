@@ -10,11 +10,11 @@ Pony.options = {
   :via_options => {
     :address => 'smtp.gmail.com',
     :port => '587',
-    :domain => 'gmail.com',
+    :enable_starttls_auto => true,
     :user_name => ENV['GMAIL_USERNAME'],
     :password => ENV['GMAIL_PASSWORD'],
     :authentication => :plain,
-    :enable_starttls_auto => true
+    :domain => 'localhost.localdomain'
   }
 }
 
@@ -46,7 +46,6 @@ post "/_email" do
   end
 
   Pony.mail   to: params[:email],
-              from: "shaneburkhart@gmail.com",
               subject: "Here are some stocks!",
               body: file
 
