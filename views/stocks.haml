@@ -1,0 +1,6 @@
+
+- stocks.each do |stock|
+  %div{ style: "margin-bottom: 50px;" }
+    - labels.each_with_index do |value, i|
+      %p= "#{value}: #{stock[i + 1]}"
+

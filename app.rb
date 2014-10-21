@@ -1,22 +1,7 @@
 require "sinatra"
 require "haml"
-require "pony"
 require "./lib/db"
 require "./lib/stock"
-
-
-Pony.options = {
-  :via => :smtp,
-  :via_options => {
-    :address => 'smtp.gmail.com',
-    :port => '587',
-    :enable_starttls_auto => true,
-    :user_name => ENV['GMAIL_USERNAME'],
-    :password => ENV['GMAIL_PASSWORD'],
-    :authentication => :plain,
-    :domain => 'localhost.localdomain'
-  }
-}
 
 configure do
   enable :sessions
@@ -28,28 +13,20 @@ get "/" do
 end
 
 post "/_email" do
-  file = File.new(File.join(File.dirname(__FILE__), "views/mail.txt"), "r").read
+  summary = File.new(File.join(File.dirname(__FILE__), "views/mail.txt"), "r").read
 
-  NetNets::Stock.all.each do |stock|
-    file += [
-      "ticker: #{stock[1]}",
-      "current_price: $#{stock[2]}",
-      "outstanding_shares: #{stock[3]}",
-      "liabilities: #{stock[4]}",
-      "tangible_assets: #{stock[5]}",
-      "net_liquid_capital: #{stock[6]}",
-      "net_liquid_capital_per_share: #{stock[7]}",
-      "price_to_liquid_ratio: #{stock[8]}%",
-      "",
-      ""
-    ].join("\n")
-  end
+  stocks = NetNets::Stock.all
 
-  Pony.mail   to: params[:email],
-              subject: "Here are some stocks!",
-              body: file
+  labels = [
+    "Ticker",
+    "Current Price",
+    "Outstanding Shares",
+    "Liabilities",
+    "Tangible Assets",
+    "Net Liquid Capital",
+    "Net Liquid Capital Per Share",
+    "Price To Liquid Ratio",
+  ]
 
-  session[:flash] = "Success!"
-
-  redirect to("/")
+  haml :stocks, locals: { stocks: stocks, labels: labels, summary: summary}
 end
