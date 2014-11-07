@@ -6,6 +6,7 @@ require "./lib/db"
 
 module NetNets
   class Stock
+    @@missed_attrs = []
 
     def self.tickers
       file = File.new(File.join(File.dirname(__FILE__), "tickers.dat"), "r").read.split(/\n/)
@@ -73,6 +74,12 @@ module NetNets
 
           if data =~ /\A[-+]?[0-9]*\.?[0-9]+\Z/
             v = data.to_f
+
+            if ASSET_MULTIPLIERS[label].nil?
+              if @@missed_attrs.find_index(label).nil?
+                @@missed_attrs << label
+              end
+            end
 
             a_mult = ASSET_MULTIPLIERS[label] || 0.0
             @assets += v * a_mult
@@ -161,7 +168,8 @@ module NetNets
     def save
       json = to_json
       ptlr = json[:price_to_liquid_ratio]
-      if ptlr <= 0 || ptlr >= 75
+      puts "Price To Liquid: #{ptlr}"
+      if ptlr <= 0 || ptlr >= 200
         return false
       end
 
@@ -200,6 +208,7 @@ module NetNets
     "Short Term Investments" => 0.75, #In the cash section
     "Accounts Receivable - Trade, Net" => 0.75,
     "Receivables - Other" => 0.75,
+    "Total Inventory" => 0.5,
     "Prepaid Expenses" => 0.5,
     "Other Current Assets, Total" => 0.5,
     "Property/Plant/Equipment, Total - Gross" => 0.5,
