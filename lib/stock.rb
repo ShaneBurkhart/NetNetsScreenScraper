@@ -45,7 +45,7 @@ module NetNets
       begin
         p_doc = Nokogiri::HTML(open(url))
       rescue
-        return
+        return false
       end
 
       price_cell = p_doc.css(CURRENT_PRICE_SELECTOR).first
@@ -57,10 +57,24 @@ module NetNets
       begin
         doc = Nokogiri::HTML(open(bal_url))
       rescue
-        return
+        return false
       end
 
       doc.css("#{QUARTER_BALANCE_DIV_ID} tr").each do |row|
+        # Check if in USD.  If not, skip.
+        header_cells = row.css("th")
+        if header_cells.count > 0
+          begin
+            if !header_cells.first.content.include?("USD")
+              puts "Not in USD."
+              return false
+            end
+          rescue
+            puts "Error when checking if in USD."
+            return false
+          end
+        end
+
         cols = row.css("td")
 
         first = cols.shift
@@ -95,6 +109,7 @@ module NetNets
         end
       end
 
+      return true
     end
 
     def net_liquid_capital

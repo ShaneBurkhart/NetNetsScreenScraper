@@ -11,8 +11,9 @@ task :scrape do
 
   NetNets::Stock.tickers.each do |ticker|
     s = NetNets::Stock.new(ticker)
-    s.calculate
-    s.save
+    if s.calculate
+      s.save
+    end
   end
 
   puts
